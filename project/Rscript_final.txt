@@ -1,11 +1,6 @@
-copy paste from read me for the headings
-erase text
-copy paste coding
-cut down unnecesssary stuff
-
 # Claire Muia
 # MAP 674 Final Project
-# Summary File
+# Accompanying R Steps Text File
 
 ## Spatial data analysis, with step-by-step description
 
