@@ -263,7 +263,7 @@ I also then mapped the states and Kentucky counties using tmap() as well, so tha
 
 With tmap() I used tm_shape(), tm_fill(), tm_borders(), tm_title(), and tm_scalebar() to create the below static outputs.
 
-![states_tmap](imagesfinal/states_tmap-1.png)
+![states_tmap](imagesfinal/states_tmap.png)
 
 ![ky_tmap](imagesfinal/ky_tmap.png)
 
