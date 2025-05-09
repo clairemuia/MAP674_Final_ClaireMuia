@@ -81,9 +81,9 @@ I always start by finding my current working directory with getwd() and then cha
 
 I utilized both states and counties included within the tigris package in R, from the TIGER US Census data. These were loaded using counties() and states(), viewed with glimpse(), the FIPS and ID codes changed to numeric variables with mutate(as.numeric()) to narrow to the contiguous US, narrowed down to the contiguous US for this assignment using filter() with those codes, the columns/variables renamed with rename() for clarification when plotted interactively later, and these datasets plotted initially with plot(). 
 
-![counties_orig](counties_orig.png)
+![counties_orig](imagesfinal/counties_orig.png)
 
-![states_orig](states_orig.png)
+![states_orig](imagesfinal/states_orig.png)
 
 ### Bringing in raster, initial plotting of original raster
 
@@ -91,7 +91,7 @@ I defined my object with the .tif file name exactly as it appears in my working 
 
 I also plotted this initial raster using plot(). 
 
-![raster_orig](raster_orig.png)
+![raster_orig](imagesfinal/raster_orig.png)
 
 This takes a long time to plot because of the size/fine resolution of the original raster. 
 
@@ -103,7 +103,7 @@ I decided, for the purposes of this assignment, to make this raster "smaller," t
 
 This was sort of an unnecessary step, as modifying resolution could have been combined with my other adjustments below that I did later. 
 
-![resamp_raster](resamp_raster.png)
+![resamp_raster](imagesfinal/resamp_raster.png)
 
 ### Matching CRS of polygon datasets and this new resampled raster
 
@@ -117,7 +117,7 @@ I then wanted to address the fact that the white oak raster was loading in to R 
 
 I created a template extent with ext() of the contiguous US using the extent of the narrowed down contiguous US counties polygon TIGER layer that I established before, created another template raster with that extent and the same resolution and CRS with rast(), extended the resampled white oak raster to that template with extend(), and then plotted this with plot() to confirm that the raster had been extended properly. 
 
-![resampext_raster](resampext_raster.png)
+![resampext_raster](imagesfinal/resampext_raster.png)
 
 ### Changing to square cell shape/resolution
 
@@ -129,43 +129,43 @@ I created a template extent using ext(), defined a new cell size, calculated the
 
 This created my final raster for use in the rest of the assignment, which I then renamed to an easier name and plotted with plot(). 
 
-![resampextsq_raster](resampextsq_raster.png)
+![resampextsq_raster](imagesfinal/resampextsq_raster.png)
 
 ### Computing dataset summary statistics
 
 I then computed summary statistics on my new white oak raster by first obtaining the dimensions of it with dim(), getting sample statistics using summary(), and then getting global stats on the whole raster with minmax() for minimum and maximum values, global(raster, mean) for mean, global(raster, median) for median, global(raster, sd) for standard deviation, global(raster, sum) for the sum of all of the raster values, and freq() to see the frequency of each cell value in the raster. 
 
-![dim](dim.png)
+![dim](imagesfinal/dim.png)
 
-![summary](summary.png)
+![summary](imagesfinal/summary.png)
 
-![global](global.png)
+![global](imagesfinal/global.png)
 
-![freq](freq.png)
+![freq](imagesfinal/freq.png)
 
 For the contiguous US states polygon, I chose to do summary stats on the ALAND -> LandArea (total land area in square meters) variable that I renamed earlier. I made a summary object and used sumamrize() to obtain mean land area, median, total number of states, minimum land area, maximum land area, and standard deviation of land area for the contiguous US, and printed that using print(). 
 
-![states_summ](states_summ.png)
+![states_summ](imagesfinal/states_summ.png)
 
 I did this same thing for contiguous US counties. 
 
-![counties_summ](counties_summ.png)
+![counties_summ](imagesfinal/counties_summ.png)
 
 To obtain summary stats on just Kentucky counties, I used the counties() function from tigris again and specified state to KY. I could have done this differently, as discussed below. I changed the CRS of this subset of counties to match the narrowed down county_new object I had made prior, again using writeLines(st_crs()) and st_transform(). I then did the same thing as for US counties using summarize() and print() to obtain the stats. 
 
-![ky_summ](ky_summ.png)
+![ky_summ](imagesfinal/ky_summ.png)
 
 ### Creating and evaluating histogram and boxplot
 
 I attempted to create a raster histogram of the white oak raster using terra's hist(), which resulted in the below error and histogram. 
 
-![terra_error](terra_error.png)
+![terra_error](imagesfinal/terra_error.png)
 
-![raster_terrahist](raster_terrahist.png)
+![raster_terrahist](imagesfinal/raster_terrahist.png)
 
 A way around this issue (which I assume just comes from the fact that most of this extended raster is NA values, which would then make up for the majority of the raster values) is to designate only non-NA values for creating the histogram. This was done using values() and !is.na(values()), and then hist(). 
 
-![raster_nonnahist](raster_nonnahist.png)
+![raster_nonnahist](imagesfinal/raster_nonnahist.png)
 
 The resulting histogram here is similar to the one created before with the error, but just without that error. I'm not entirely sure what the deal is with this, but I figured the histogram output itself seems to make sense. 
 
@@ -175,11 +175,11 @@ This all makes sense to me, as obviously there are not many areas left in the US
 
 I also attempted a boxplot of the raster using boxplot(). This also came up with some similar sampling errors and the following boxplot.
 
-![raster_box](raster_box.png)
+![raster_box](imagesfinal/raster_box.png)
 
 I then made a boxplot instead with those same non-NA values as established for the histogram, which made a boxplot without errors that looked similar. 
 
-![raster_nonnabox](raster_nonnabox.png)
+![raster_nonnabox](imagesfinal/raster_nonnabox.png)
 
 The many outliers are visible, and the mean around 4 tons/acre is visible, with most data right around that value (creating the many nearby outliers). 
 
@@ -187,25 +187,25 @@ I also created a histogram and boxplot of contiguous states land area, contiguou
 
 Contiguous US states:
 
-![states_hist](states_hist.png)
+![states_hist](imagesfinal/states_hist.png)
 
-![states_box](states_box.png)
+![states_box](imagesfinal/states_box.png)
 
 The weird distribution of contiguous US states sizes/areas can be seen in the histogram, where there is one major outlier in size and a decent grouping around the mean of 156223616735 square meters. The three actual higher outliers are seen in the boxplot. 
 
 Contiguous US counties: 
 
-![counties_hist](counties_hist.png)
+![counties_hist](imagesfinal/counties_hist.png)
 
-![counties_box](counties_box.png)
+![counties_box](imagesfinal/counties_box.png)
 
 The contiguous US counties are also weird, with abundant outliers above the mean of 2462382465 square meters. That's also seen in the extremely high peak that tapers off very quickly into the outliers with the higher values. 
 
 Kentucky counties:
 
-![ky_hist](ky_hist.png)
+![ky_hist](imagesfinal/ky_hist.png)
 
-![ky_box](ky_box.png)
+![ky_box](imagesfinal/ky_box.png)
 
 Kentucky counties, with a much smaller number of counties, has a distribution much more easily discerned from ist histogram and boxplot. The mean is visible with the IQR encompassing the large portion of the data (many of the counties are similar in size), and two outliers are visible. The distibution in the histogram does not have a taper to extreme outliers. 
 
@@ -215,11 +215,11 @@ At this point I also wanted to go ahead and actually map out these state and cou
 
 I did this by using ggplot() + geom_sf() and specifications. 
 
-![states_map](states_map.png)
+![states_map](imagesfinal/states_map.png)
 
-![counties_map](counties_map.png)
+![counties_map](imagesfinal/counties_map.png)
 
-![ky_map](ky_map.png)
+![ky_map](imagesfinal/ky_map.png)
 
 ### Rasterizing county vector datasets to carry out selected spatial analysis
 
@@ -251,11 +251,11 @@ These all create datasets which can now be plotted and visually show the zonal s
 
 I then used ggplot() with geom_sf(), scale_fill_distiller(), labs(), theme(), and annotation_scale(), along with other specifications to map the mean white oak biomass per contiguous US state, contiguous US county, and Kentucky county. 
 
-![states_ggplot](states_ggplot.png)
+![states_ggplot](imagesfinal/states_ggplot.png)
 
-![counties_ggplot](counties_ggplot.png)
+![counties_ggplot](imagesfinal/counties_ggplot.png)
 
-![ky_ggplot](ky_ggplot.png)
+![ky_ggplot](imagesfinal/ky_ggplot.png)
 
 ### Tmapping
 
@@ -263,9 +263,9 @@ I also then mapped the states and Kentucky counties using tmap() as well, so tha
 
 With tmap() I used tm_shape(), tm_fill(), tm_borders(), tm_title(), and tm_scalebar() to create the below static outputs.
 
-![states_tmap](states_tmap-1.png)
+![states_tmap](imagesfinal/states_tmap-1.png)
 
-![ky_tmap](ky_tmap.png)
+![ky_tmap](imagesfinal/ky_tmap.png)
 
 ### Interactive tmapping
 
