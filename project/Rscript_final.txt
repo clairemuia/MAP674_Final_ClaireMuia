@@ -1,0 +1,444 @@
+copy paste from read me for the headings
+erase text
+copy paste coding
+cut down unnecesssary stuff
+
+# Claire Muia
+# MAP 674 Final Project
+# Summary File
+
+## Spatial data analysis, with step-by-step description
+
+Full R code steps for the operations discussed in the accompanying README summary file. 
+
+### Preparing R for workflow
+
+library(sf)
+library(terra)
+library(dplyr)
+library(tmap)    
+library(leaflet) 
+library(ggplot2) 
+library(ggspatial)
+library(tidyverse)
+library(raster)
+library(tigris)
+
+### Setting working directory
+
+getwd()
+setwd("C:\\Users\\User\\Documents\\Muia_674R_wd")
+
+### Bringing in the TIGER polygon datasets, initial plotting
+
+county <- counties(cb = TRUE, 
+                   resolution = '20m')
+
+glimpse(county)
+
+county2 <- county %>%
+  mutate(state = as.numeric(STATEFP),
+         fips = as.numeric(GEOID)) %>%
+  filter(state != 2, state != 15, state < 60) 
+
+county3 <- rename(county2, 
+                  StateFIPS = 1, CountyFIPS = 2, CountyANSI = 3, AffGeoID = 4, GeoFIPSID = 5, CountyName = 6, 
+                  LegalName = 7, USPSAbb = 8, StateName = 9, LegalStatCode = 10, LandArea = 11, WaterArea = 12,
+                  Geometry = 13)
+
+glimpse(county3)
+
+plot(county3)
+
+state <- states(cb = TRUE, resolution = '20m')
+
+glimpse(state)
+
+state2 <- state %>%
+  mutate(state = as.numeric(STATEFP),
+         fips = as.numeric(GEOID)) %>%
+  filter(state != 2, state != 15, state < 60) 
+
+state3 <- rename(state2, 
+                 StateFIPS = 1, StateANSI = 2, AffGeoID = 3, GeoFIPSID = 4, USPSAbb = 5, StateName = 6, 
+                 LegalStatCode = 7, LandArea = 8, WaterArea = 9, Geometry = 10)
+
+glimpse(state3)
+
+plot(state3)
+
+### Bringing in raster, initial plotting of original raster
+
+wo_raster <- "Hosted_AGB_0802_2018_WHITE_OAK_06022023131242.tif"
+
+wo_rast <- rast(wo_raster)
+
+plot(wo_rast, main = "Raster of US White Oak Biomass")
+
+### Modifying original raster resolution for easier/quicker analysis
+
+new_rows <- 3200
+new_cols <- 4900
+
+orig_extent <- ext(wo_rast)
+new_res_x <- (xmax(orig_extent) - xmin(orig_extent)) / new_cols
+new_res_y <-  (ymax(orig_extent) - ymin(orig_extent)) / new_rows
+new_res <- c(new_res_x, new_res_y)
+
+temp_raster <- rast(orig_extent, res = new_res, crs = crs(wo_rast))
+
+wo_resampled <- resample(wo_rast, temp_raster, method = "bilinear")
+
+plot(wo_resampled, main = "Resampled Raster of US White Oak Biomass")
+
+### Matching CRS of polygon datasets and this new resampled raster
+
+writeLines(st_crs(county3)$WktPretty)
+
+writeLines(st_crs(state3)$WktPretty)
+
+writeLines(st_crs(wo_resampled)$WktPretty)
+
+county_new <- st_transform(county3, crs = crs(wo_resampled))
+
+state_new <- st_transform(state3, crs = crs(wo_resampled))
+
+writeLines(st_crs(county_new)$WktPretty)
+
+writeLines(st_crs(state_new)$WktPretty)
+
+### Matching the extents of the rasters/extending the original raster using template, plotting
+
+contiguous_extent <- ext(county_new)
+print(contiguous_extent)
+
+temp_raster2 <- rast(contiguous_extent,
+                        res = new_res,
+                        crs = crs(wo_resampled))
+
+ext(wo_resampled)
+ext(temp_raster2)
+
+wo_extended <- extend(wo_resampled, temp_raster2)
+
+res(wo_extended)
+ext(wo_extended)
+
+plot(wo_extended, main = "Resampled, Extended Raster of US White Oak Biomass")
+
+### Changing to square cell shape/resolution
+
+resamp_extent <- ext(wo_extended)
+
+new_size <- 200 
+
+new_cols <- ceiling((xmax(resamp_extent) - xmin(resamp_extent)) / new_size)
+new_rows <- ceiling((ymax(resamp_extent) - ymin(resamp_extent)) / new_size)
+
+temp_raster3 <- rast(resamp_extent, nrows = new_rows, ncols = new_cols, crs = crs(wo_extended))
+
+res(temp_raster3) <- c(new_size, new_size)
+
+wo_resampext_square <- resample(wo_extended, temp_raster3, method = "bilinear") 
+
+plot(wo_resampext_square, main = "Resampled, Extended, Squared Res Raster of US White Oak Biomass")
+
+wo_rast_complete <- wo_resampext_square
+
+### Computing dataset summary statistics
+
+dim(wo_rast_complete)
+
+summary(wo_rast_complete, na.rm = TRUE)
+
+minmax(wo_rast_complete)
+global(wo_rast_complete, mean, na.rm=TRUE)
+global(wo_rast_complete, median, na.rm=TRUE)
+global(wo_rast_complete, sd, na.rm=TRUE)
+global(wo_rast_complete, sum, na.rm=TRUE)
+freq(wo_rast_complete)
+
+US_statesumm <- state_new %>%
+  summarize(mean_land_area = mean(LandArea),
+            median_land_area = median(LandArea),
+            total_states = n(),
+            min_land_area = min(LandArea),
+            max_land_area = max(LandArea),
+            sd = sd(LandArea), na.rm = TRUE)
+
+print(US_statesumm)
+
+US_countysumm <- county_new %>%
+  summarize(mean_land_area = mean(LandArea),
+            median_land_area = median(LandArea),
+            total_counties = n(),
+            min_land_area = min(LandArea),
+            max_land_area = max(LandArea),
+            sd = sd(LandArea), na.rm = TRUE)
+
+print(US_countysumm)
+
+kentucky_counties <- counties(state = "KY", cb = TRUE) 
+
+writeLines(st_crs(kentucky_counties)$WktPretty)
+
+ky_counties_new <- st_transform(kentucky_counties, crs = crs(county_new))
+
+writeLines(st_crs(ky_counties_new)$WktPretty)
+
+glimpse(ky_counties_new)
+
+KY_countysumm <- ky_counties_new %>%
+  summarize(
+    mean_land_area = mean(ALAND),
+    median_land_area = median(ALAND),
+    total_counties = n(),
+    min_land_area = min(ALAND),
+    max_land_area = max(ALAND),
+    sd = sd(ALAND), na.rm = TRUE)
+
+print(KY_countysumm)
+
+### Creating and evaluating histogram and boxplot
+
+hist(wo_rast_complete,
+     main = "Histogram of US White Oak Biomass Raster",
+     xlab = "Raster Cell Values (WO Biomass)",
+     ylab = "Frequency",
+     breaks = 100)
+
+terra::hist(wo_rast_complete,
+     main = "Histogram of US White Oak Biomass Raster",
+     xlab = "Raster Cell Values (WO Biomass)",
+     ylab = "Frequency",
+     breaks = 100,
+     na.rm = TRUE)
+
+nonna_values <- values(wo_rast_complete)[!is.na(values(wo_rast_complete))]
+
+hist(nonna_values,
+       main = "Histogram of US White Oak Biomass Raster Non-NA",
+       xlab = "Raster Cell Values (WO Biomass)",
+       ylab = "Frequency",
+       breaks = 100)
+
+boxplot(wo_rast_complete,
+        main = "Boxplot of US White Oak Biomass Raster",
+        ylab = "Raster Cell Values (WO Biomass)")
+
+boxplot(nonna_values,
+        main = "Boxplot of US White Oak Biomass Raster",
+        ylab = "Raster Cell Values (WO Biomass)")
+
+ggplot(
+  data = state_new, mapping = aes(y = LandArea)) + 
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Contiguous US States Land Area",
+    y = "Total Land Area (square m)")
+
+ggplot(
+  data = state_new, mapping = aes(x = LandArea)) +
+  geom_histogram(bins = 100) +
+  labs(title = "Histogram of Contiguous US States Land Area",
+       x = "Total Land Area (square m)", y = "Frequency")
+
+ggplot(
+  data = county_new, mapping = aes(y = LandArea)) + 
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Contiguous US Counties Land Area",
+    y = "Total Land Area (square m)")
+
+ggplot(
+  data = county_new, mapping = aes(x = LandArea)) +
+  geom_histogram(bins = 100) +
+  labs(title = "Histogram of Contiguous US Counties Land Area",
+       x = "Total Land Area (square m)", y = "Frequency")
+
+ggplot(
+  data = ky_counties_new, mapping = aes(y = ALAND)) + 
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Kentucky Counties Total Land Area",
+    y = "Total Land Area (square m)")
+
+ggplot(
+  data = ky_counties_new, mapping = aes(x = ALAND)) +
+  geom_histogram() +
+  labs(title = "Histogram of Kentucky Counties Total Land Area",
+       x = "Total Land Area (square m)", y = "Frequency")
+
+### Mapping of polygon layers (for fun)
+
+ggplot(state_new) +
+  geom_sf() +
+  labs(title = "Contiguous US States") +
+  annotation_scale(location = "br")
+
+ggplot(ky_counties_new) +
+  geom_sf() + 
+  labs(title = "Kentucky Counties") +
+  annotation_scale(location = "tl")
+
+ggplot(county_new) +
+  geom_sf() +
+  labs(title = "Contiguous US Counties") +
+  annotation_scale(location = "br")
+
+### Rasterizing county vector datasets to carry out selected spatial analysis
+
+state_rast <- rasterize(vect(state_new), 
+                         wo_rast_complete, 
+                         field = "fips")
+
+dim(state_rast)
+
+summary(state_rast, na.rm = TRUE)
+
+minmax(state_rast)
+global(state_rast, mean, na.rm=TRUE)
+global(state_rast, median, na.rm=TRUE) 
+global(state_rast, sd, na.rm=TRUE)
+global(state_rast, sum, na.rm=TRUE)
+freq(state_rast)
+
+county_rast <- rasterize(vect(county_new), 
+                         wo_rast_complete, 
+                         field = "fips")
+
+dim(county_rast)
+
+summary(county_rast, na.rm = TRUE)
+
+minmax(county_rast)
+global(county_rast, mean, na.rm=TRUE)
+global(county_rast, median, na.rm=TRUE) 
+global(county_rast, sd, na.rm=TRUE)
+global(county_rast, sum, na.rm=TRUE)
+freq(county_rast)
+
+### Zonal statistics (mean) using states and counties as zones 
+
+wo_state_zones <- zonal(wo_rast_complete, 
+                     state_rast, 
+                     fun = "mean", 
+                     na.rm = TRUE)
+
+summary(wo_state_zones)
+
+wo_state_zones <- rename(wo_state_zones, State_MeanWOBiomass = 2)
+
+summary(wo_state_zones)
+
+dim(wo_state_zones)
+
+wo_county_zones <- zonal(wo_rast_complete, 
+                        county_rast, 
+                        fun = "mean", 
+                        na.rm = TRUE)
+
+summary(wo_county_zones)
+
+wo_county_zones <- rename(wo_county_zones, County_MeanWOBiomass = 2)
+
+summary(wo_county_zones)
+
+dim(wo_county_zones)
+
+### Joining for mapping
+
+state_join1 <- left_join(state_new,
+                         wo_state_zones, 
+                         by = 'fips')
+
+county_join1 <- left_join(county_new, 
+                          wo_county_zones, 
+                          by = "fips")
+
+county_join2 <- left_join(county_new, 
+                          wo_county_zones, 
+                          by = "fips")
+glimpse(county_join2)
+
+ky_join <- filter(county_join2, 
+                   StateFIPS == "21")
+
+glimpse(ky_join)
+
+summary(ky_join)
+
+### Ggplotting
+
+ggplot(data = state_join1) +
+  geom_sf(aes(fill = State_MeanWOBiomass), size = 0.1) +
+  scale_fill_distiller(name = "Mean Biomass (tons/acre)", 
+                       palette = "Greens", 
+                       direction = 1) +
+  labs(title = "Contiguous US State-Level Mean White Oak Biomass", size = 0.01) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  annotation_scale(location = "bl")
+
+ggplot(data = county_join1) +
+  geom_sf(aes(fill = County_MeanWOBiomass), size = 0.1) +
+  scale_fill_distiller(name = "Mean Biomass (tons/acre)", 
+                       palette = "Greens", 
+                       direction = 1) +
+  labs(title = "Contiguous US County-Level Mean White Oak Biomass", size = 0.01) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  annotation_scale(location = "bl")
+
+ggplot(data = ky_join) +
+  geom_sf(aes(fill = County_MeanWOBiomass), size = 0.1) +
+  scale_fill_distiller(name = "Mean Biomass (tons/acre)", 
+                       palette = "Greens", 
+                       direction = 1) +
+  labs(title = "Kentucky County-Level Mean White Oak Biomass") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  theme(plot.title = element_text(size = 12)) +
+  annotation_scale(location = "tl")
+
+### Tmapping
+
+tmap_mode("plot")
+
+state_tmap <-
+  tm_shape(state_join1) +
+  tm_fill(col = "State_MeanWOBiomass",
+          fill.legend = tm_legend(title = "Mean Biomass (tons/acre)"),
+          palette = "brewer.greens",
+          style = "cont") +
+  tm_borders(lwd = 0.1) + 
+  tm_title("Contiguous US State-Level Mean White Oak Biomass") +
+  tm_scale_bar()
+
+state_tmap
+
+ky_tmap <-
+  tm_shape(ky_join) +
+  tm_fill(col = "County_MeanWOBiomass",
+          fill.legend = tm_legend(title = "Mean Biomass (tons/acre)", text.size = 0.5),
+          palette = "brewer.greens",
+          style = "cont") +
+  tm_borders(lwd = 0.1) + 
+  tm_title("Kentucky County-Level Mean White Oak Biomass") +
+  tm_scalebar()
+
+ky_tmap
+
+### Interactive tmapping
+
+tmap_mode("view")
+
+state_tmap
+
+tmap_save(state_tmap, filename = "state_wo_tmap.html")
+
+ky_tmap
+
+tmap_save(ky_tmap, filename = "ky_wo_tmap.html")
+
+tmap_mode("plot")
