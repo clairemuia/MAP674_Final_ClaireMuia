@@ -154,16 +154,19 @@
         <div class="row">
             <div class="first-column">
                 <p>
-                    Description can be updated: Arches extracted from the Domestic and Antarctic Names (State and Topical Gazetteer) published by
-                    the United States Board on Geographic Namkes. (<a hred="https://geonames.usgs.gov/domestic">geonames.usgs.gov</a>)
-                    Data accessed August, 2018. Contours were extracted from a USGS NED 1/3 arc-second raster digital
-                    elevation model. This data can be accessed at the USGS 3D Elevation Program (<a href="https://www.usgs.gov/core-science-systems/ngp/3dep">usgs.gov</a>)
+                    Mapping of mean white oak (Quercus alba) biomass (tons/acre) by contiguous US states and Kentucky counties via zonal statistics 
+                    and visualization in program R. Contiguous US white oak raster data extracted from the US Forest Service FIA (Forest Inventory Analysis) 
+                    BIGMAP Tree Species Biomass data (accessible at: <a href="https://data.fs.usda.gov/geodata/rastergateway/bigmap/index.php">usda.gov</a>). 
+                    
+                    Contiguous US state and county boundary data extracted from US Census TIGER/Line data via the 'tigris' R package (accessible at: 
+                    <a href="https://github.com/walkerke/tigris">github.com</a>). 
                 </p>
-                <h3>Tools used in this project</h3>
+                <h3>Mapping Metadata</h3>
                 <ul>
-                    <li>PostGIS was used to store/query the national dataset.</li>
-                    <li>Data is shown on Mapbox web map with geolocation services enabled. If the map got popular it would require a fee to use.</li>
-                    <li>GDAL and QGIS to convert raster elevation units and create contours.</li>
+                    <li>Maps created by Claire Muia for MAP 674 course at the University of Kentucky.</li>
+                    <li>R Studio Version 2024.12.0+467 utilized for data processing and visualization.</li>
+                    <li>Projection used: NAD 83/USA Contiguous Albers Equal Area Conic</li>
+                    <li>Data sources listed above.</li>
                 </ul>
 
 
