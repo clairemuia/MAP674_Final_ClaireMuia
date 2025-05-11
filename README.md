@@ -275,6 +275,8 @@ To turn these tmaps into their interactive version, tmap_mode("View") was used, 
 
 [ky_wo_tmap](../../htmls/ky_wo_tmap.html)
 
+Accompanying 'index.html' file contains these maps, a summary, and more mapping metadata information. 
+
 ## Discussion
 
 ### Interpreting spatial analysis results
