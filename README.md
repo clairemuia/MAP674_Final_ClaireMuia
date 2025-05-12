@@ -4,9 +4,11 @@
 
 ## Introduction
 
+This document includes the entire data analysis and map making process. Please [visit this page to view the final maps](https://clairemuia.github.io/MAP674_Final_ClaireMuia/) online.
+
 ### Brief description of question of interest
 
-For this project, I decided to explore questions related to white oak (Quercus alba) presence, abundance, and distribution in the US and then Kentucky. 
+For this project, I decided to explore questions related to white oak (Quercus alba) presence, abundance, and distribution in the US and then Kentucky.
 White oaks are a huge topic here in the FNR Department at UK, and I'm particularly interested in them (and overall forest biomass) as there is a very direct and influential connection between white oaks, forest habitats, egde habitats, and wildlife. Their populations aren't in horrendous shape, but there is an overall decline and also struggle to regenerate and recruit into the forest canopies where they occur.
 White oaks are massively important to not only the timber and bourbon industries of Kentucky and other states, but also are a critical component of the diets and habitat structures of a number of animal species, from microscopic (forest invertebrates) to quite large (my thesis study animal, the elk) and numerous in between. 
 
@@ -334,5 +336,3 @@ I could have used minimum for the zonal statistics instead of mean perhaps, to m
 I think zonal statistics was generally appropriate to use for this data/these objectives, and that it resulted in informative visualizations for most audiences (but probably wouldn't be used much in a very scientific sense since I decided to perform the stats with governmental boundaries as zones and means within those). A different type of spatial analysis and subsequent mapping may be more informative for actual foresters/scientists, but I think zonal stats in this manner were appropriate for the project and the broader objectives and audiences I mentioned, along with conservation dollar/effort allocation to specific legislative areas in the US.  
 
 I would have thought/planned my R workflow out more ahead of time, especially concerning modifying the original WO raster, in order to cut down on unnecessary steps and be more concise coding-wise. A lot of those steps can be combined if the process is thought out ahead of time (simultaneously making the resolution more coarse, changing the cell size to squares, and extending the new raster). I thought ahead and planned better for the mapping, so that part of the process was much more consice and less sort of "stream of consciousness" coding as I went along. I could have gone back and slimmed those resampling parts down, but I didn't want to push too close to the deadline of the assignment. 
-
-### You don't have to work through lots of iterations of the analysis when you identify something that could be tried in the future. The purpose of the map discussion is to think critically about the analysis you worked through, the map decisions you made, and how those could be adapted in the future.
